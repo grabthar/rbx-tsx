@@ -22,7 +22,7 @@ import {
   concat,
   raw,
 } from "../ast/luau-ast.ts";
-import { posix } from "node:path";
+import { posix, dirname, relative } from "node:path";
 import { ROBLOX_SERVICES } from "../mappings/roblox-services.ts";
 import type { TransformContext } from "./transform-context.ts";
 import { transformExpression } from "./expression-transform.ts";
@@ -70,6 +70,15 @@ export function transformImport(
 
   // Relative imports
   if (moduleSpecifier.startsWith("./") || moduleSpecifier.startsWith("../")) {
+    return transformRelativeImport(node, moduleSpecifier, ctx);
+  }
+
+  // Absolute imports
+  const match = [...ctx.pathAliases.entries()].find(([key]) =>
+    moduleSpecifier.startsWith(key)
+  );
+  if (match) {
+    toRelative(moduleSpecifier, ctx);
     return transformRelativeImport(node, moduleSpecifier, ctx);
   }
 
@@ -370,6 +379,13 @@ function relativePathToRequirePath(
 
   return base;
 }
+
+function toRelative(moduleSpecifier: string, ctx: TransformContext): string {
+  const currentFile = dirname(posix.normalize(ctx.filename)).replaceAll("\\", "/");
+  const result = relative(dirname(currentFile), moduleSpecifier).replaceAll("\\", "/");
+  return result;
+}
+
 
 // ── Package Import ──
 

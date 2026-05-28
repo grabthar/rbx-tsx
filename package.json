@@ -31,11 +31,12 @@
     "node": ">=18"
   },
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --external typescript",
-    "test": "bun test",
-    "dev": "bun run src/index.ts",
-    "generate": "bun run scripts/generate-types.ts",
-    "prepublishOnly": "bun run build"
+    "build": "npx tsx ./src/index.ts  compile ../Factions/factions/Src -o out",
+    "builddemo": "npx tsx ./src/index.ts  compile ./demo/src -o out",
+    "test": "npx tsx --test",
+    "dev": "npm run src/index.ts",
+    "generate": "npm run scripts/generate-types.ts",
+    "prepublishOnly": "npm run build"
   },
   "files": [
     "dist/",
@@ -45,7 +46,7 @@
   ],
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.18",
-    "@types/bun": "latest",
+    "@types/node": "^25.9.1",
     "tailwindcss": "^4.1.18",
     "yaml": "^2.8.2"
   },

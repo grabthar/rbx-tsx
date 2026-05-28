@@ -5,3 +5,5 @@ dist/
 demo/out
 demo/Packages
 .claude/
+out/
+**/*.OLD

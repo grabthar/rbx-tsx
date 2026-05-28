@@ -20,6 +20,8 @@ import { execSync } from "child_process";
 import { handleInit, type InitOptions } from "./init.ts";
 import { findPackageManifest } from "./package-manifest.ts";
 
+import {ROBLOX_SERVICES} from "./mappings/roblox-services.ts";
+
 export function createCLI(): Command {
   const program = new Command();
   program
@@ -121,6 +123,7 @@ function walkRojoTree(
   return results;
 }
 
+//TODO get associated classname for service (can be renamed by user).
 /**
  * Parse a Rojo default.project.json and derive path aliases.
  * Maps source-relative directories to Luau require paths.
@@ -134,17 +137,16 @@ function buildAliasesFromRojo(
   if (!project.tree) return new Map();
 
   const mappings = walkRojoTree(project.tree);
-  const outRel = relative(projectRoot, outputDir).replaceAll("\\", "/");
+  // fix, to support external "out" dir
+  const outRel = basename(outputDir.replaceAll("\\", "/"));
   const aliases = new Map<string, string>();
 
   for (const { fsPath, robloxPath } of mappings) {
     // Only care about $path entries under the output directory
-    const isUnder =
-      fsPath === outRel || fsPath.startsWith(outRel + "/");
+    const isUnder = fsPath === outRel || fsPath.startsWith(outRel + "/");
     if (!isUnder) continue;
 
-    const sourceDir =
-      fsPath === outRel ? "" : fsPath.slice(outRel.length + 1);
+    const sourceDir = fsPath === outRel ? "" : fsPath.slice(outRel.length + 1);
     if (!sourceDir) continue; // skip root output dir itself
 
     // Build Luau path: game:GetService("TopService").rest.of.path
@@ -153,7 +155,7 @@ function buildAliasesFromRojo(
     for (const seg of rest) luauPath += `.${seg}`;
     aliases.set(sourceDir, luauPath);
   }
-
+  
   return aliases;
 }
 
