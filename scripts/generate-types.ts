@@ -399,6 +399,55 @@ function formatYamlParams(params: YamlParam[]): string {
     .join(", ");
 }
 
+interface OperatorOverload {
+    parameter: string;
+    returns: string;
+}
+
+interface OperatorDefinition {
+    add?: OperatorOverload[];
+    sub?: OperatorOverload[];
+    mul?: OperatorOverload[];
+    div?: OperatorOverload[];
+}
+
+/** Types with special methods add/sub/mul/div cause TS doesn't support operator overloading */
+const OPERATOR_TYPES = new Map<string, OperatorDefinition>([
+  ["Vector3", {
+    add: [{ parameter: "Vector3", returns: "Vector3" },],
+    sub: [{ parameter: "Vector3", returns: "Vector3" },],
+    mul: [{ parameter: "Vector3", returns: "Vector3" },{ parameter: "number", returns: "Vector3" },],
+    div: [{ parameter: "Vector3", returns: "Vector3" },{ parameter: "number", returns: "Vector3" },],
+  }],
+  ["Vector2", {
+    add: [{ parameter: "Vector2", returns: "Vector2" },],
+    sub: [{ parameter: "Vector2", returns: "Vector2" },],
+    mul: [{ parameter: "Vector2", returns: "Vector2" },{ parameter: "number", returns: "Vector2" },],
+    div: [{ parameter: "Vector2", returns: "Vector2" },{ parameter: "number", returns: "Vector2" },],
+  }],
+  ["CFrame", {
+    add: [{ parameter: "Vector3", returns: "CFrame" },],
+    sub: [{ parameter: "Vector3", returns: "CFrame" },],
+    mul: [{ parameter: "CFrame", returns: "CFrame" },{ parameter: "Vector3", returns: "Vector3" },],
+  }],
+  ["UDim", {
+    add: [{ parameter: "UDim", returns: "UDim" },],
+    sub: [{ parameter: "UDim", returns: "UDim" },],
+  }],
+  ["UDim2", {
+    add: [{ parameter: "UDim2", returns: "UDim2" },],
+    sub: [{ parameter: "UDim2", returns: "UDim2" },],
+  }],
+]);
+
+function emitOperator(lines: string[], method: string, overloads?: OperatorOverload[],) {
+    if (!overloads) return;
+
+    for (const overload of overloads) {
+        lines.push(`\t${method}(value: ${overload.parameter}): ${overload.returns};`,);
+    }
+}
+
 function generateDatatypesFromYaml(datatypes: YamlDatatype[]): string {
   const lines: string[] = [
     "// Auto-generated from Roblox creator-docs YAML — do not edit manually",
@@ -450,6 +499,15 @@ function generateDatatypesFromYaml(datatypes: YamlDatatype[]): string {
         const ret = resolveReturnType(method);
         lines.push(`${doc}\t${safeName(methodName)}(${params}): ${ret};`);
       }
+    }
+
+    const operators = OPERATOR_TYPES.get(dt.name);
+    // Special operators
+    if (operators) {
+      emitOperator(lines, "add", operators.add);
+      emitOperator(lines, "sub", operators.sub);
+      emitOperator(lines, "mul", operators.mul);
+      emitOperator(lines, "div", operators.div);
     }
 
     lines.push("}\n");

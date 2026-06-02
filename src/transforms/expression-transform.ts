@@ -874,6 +874,44 @@ function transformSpecialCallExpression(
   const methodName = propAccess.name.text;
   const objText = propAccess.expression.getText();
 
+  // Operators on Vector2 Vector3 CFrame etc
+  if (ts.isPropertyAccessExpression(node.expression)) {
+    const method = node.expression.name.text;
+    if (method === "add" || method === "sub" || method === "mul" || method === "div") {
+      //TODO typechecking on "propAccess.expression" check for:
+      //  Vector2(+,-,*,/)
+      //  Vector3(+,-,*,/) 
+      //  Vector2int16(+,-,*,/) 
+      //  Vector3int16(+,-,*,/) 
+      //  CFrame(+,-,*)
+      //  UDim(+,-)
+      //  UDim2(+,-)
+      // replace ts.createSourceFile -> ts.createProgram
+      // let program = ts.createProgram(fileNames, options);
+      // ctx.checker = program.getTypeChecker();
+      // then here:
+      // ctx.checker.getTypeAtLocation(node)
+
+      const argument = node.arguments[0];
+      if (node.arguments.length !== 1 || !argument) {
+        throw new Error(`Operator method '${method}' requires one argument`);
+      }
+      const left = transformExpression(node.expression.expression, ctx,);
+      const right = transformExpression(argument, ctx,);
+
+      switch (method) {
+        case "add":
+          return binary(left, "+", right);
+        case "sub":
+          return binary(left, "-", right);
+        case "mul":
+          return binary(left, "*", right);
+        case "div":
+          return binary(left, "/", right);
+      }
+    }
+  }
+
   // RegExp.test(str) / RegExp.exec(str) — use : syntax so self is passed
   if (
     ts.isRegularExpressionLiteral(propAccess.expression) &&

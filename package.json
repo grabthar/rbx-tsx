@@ -34,8 +34,10 @@
     "build": "bun build src/index.ts --outdir dist --target node --external typescript",
     "test": "bun test",
     "dev": "bun run src/index.ts",
+    "devdemo": "bun run src/index.ts compile ./demo/src -o out",
     "generate": "bun run scripts/generate-types.ts",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "link": "bun link"
   },
   "files": [
     "dist/",

@@ -211,6 +211,10 @@ interface CFrame {
 	 * Returns the angle, in radians, between the orientation of one `CFrame` and another.
 	 */
 	AngleBetween(other?: CFrame): number;
+	add(value: Vector3): CFrame;
+	sub(value: Vector3): CFrame;
+	mul(value: CFrame): CFrame;
+	mul(value: Vector3): Vector3;
 }
 
 declare const CFrame: {
@@ -357,6 +361,8 @@ declare const Content: {
 	 * Returns a new `Content` with an [asset URI](../../../projects/assets/index.md#asset-uris) `string` value referencing content external to the place.
 	 */
 	fromUri(uri?: string): Content;
+	/** Returns a new `Content` from a numeric asset ID. */
+	fromAssetId(assetId?: number): Content;
 	/** Returns a new `Content` with a strong reference to an `Object`. */
 	fromObject(object?: Instance): Content;
 	/** An empty `Content` value with `Content.SourceType` of `None`. */
@@ -543,10 +549,12 @@ declare const NumberSequenceKeypoint: {
 
 /** Stores parameters used in boundary-querying functions. */
 interface OverlapParams {
-	/** An array of objects whose descendants is used in filtering candidates. */
-	readonly FilterDescendantsInstances: any[];
-	/** Determines how the `OverlapParams.FilterDescendantsInstances` list is used. */
-	readonly FilterType: Enum.RaycastFilterType;
+	/**
+	 * An optional array of instances whose descendants will be excluded from the query.
+	 */
+	readonly ExcludeInstances: {Instance};
+	/** An optional array of instances whose descendants will be included in the query. */
+	readonly IncludeInstances: {Instance};
 	/** The maximum amount of parts to be returned by the query. */
 	readonly MaxParts: number;
 	/** The collision group used for the operation. */
@@ -561,6 +569,12 @@ interface OverlapParams {
 	 * When enabled, the query will ignore all part collision properties and perform a brute-force check on every part.
 	 */
 	readonly BruteForceAllSlow: boolean;
+	/** An array of objects whose descendants are used in filtering candidates. */
+	readonly FilterDescendantsInstances: any[];
+	/**
+	 * Determines whether the `FilterDescendantsInstances` array is used as an exclude or include list.
+	 */
+	readonly FilterType: Enum.RaycastFilterType;
 	/** Adds the instances provided to `FilterDescendantsInstances`. */
 	AddToFilter(instances?: Instance | Array): void;
 }
@@ -698,11 +712,11 @@ declare const Ray: {
 /** A container for parameters used in raycasting operations. */
 interface RaycastParams {
 	/**
-	 * An array of objects whose descendants are used in filtering raycasting candidates.
+	 * An optional array of instances whose descendants will be excluded from the query.
 	 */
-	readonly FilterDescendantsInstances: any[];
-	/** Determines how the `FilterDescendantsInstances` array is used. */
-	readonly FilterType: Enum.RaycastFilterType;
+	readonly ExcludeInstances: {Instance};
+	/** An optional array of instances whose descendants will be included in the query. */
+	readonly IncludeInstances: {Instance};
 	/**
 	 * Determines whether the water material is considered when raycasting against `Terrain`.
 	 */
@@ -717,6 +731,12 @@ interface RaycastParams {
 	 * When enabled, the query will ignore all part collision properties and perform a brute-force check on every part.
 	 */
 	readonly BruteForceAllSlow: boolean;
+	/** An array of objects whose descendants are used to filter raycasting candidates. */
+	readonly FilterDescendantsInstances: any[];
+	/**
+	 * Determines whether the `FilterDescendantsInstances` array is used as an exclude or include list.
+	 */
+	readonly FilterType: Enum.RaycastFilterType;
 	/** Adds the instances provided to `FilterDescendantsInstances`. */
 	AddToFilter(instances?: Instance | Array): void;
 }
@@ -909,6 +929,8 @@ interface UDim {
 	readonly Scale: number;
 	/** The absolute offset component of the `UDim`. */
 	readonly Offset: number;
+	add(value: UDim): UDim;
+	sub(value: UDim): UDim;
 }
 
 declare const UDim: {
@@ -930,6 +952,8 @@ interface UDim2 {
 	readonly Height: UDim;
 	/** Returns a `UDim2` interpolated linearly between the value and the given goal. */
 	Lerp(goal?: UDim2, alpha?: number): UDim2;
+	add(value: UDim2): UDim2;
+	sub(value: UDim2): UDim2;
 }
 
 declare const UDim2: {
@@ -1010,6 +1034,12 @@ interface Vector2 {
 	 * Returns `true` if the X and Y components of the other `Vector2` are within epsilon units of each corresponding component of this `Vector2`.
 	 */
 	FuzzyEq(other?: Vector2, epsilon?: number): boolean;
+	add(value: Vector2): Vector2;
+	sub(value: Vector2): Vector2;
+	mul(value: Vector2): Vector2;
+	mul(value: number): Vector2;
+	div(value: Vector2): Vector2;
+	div(value: number): Vector2;
 }
 
 declare const Vector2: {
@@ -1084,6 +1114,12 @@ interface Vector3 {
 	 * Returns a `Vector3` with each component as the lowest among the respective components of both provided `Vector3` objects.
 	 */
 	Min(vector?: Vector3): Vector3;
+	add(value: Vector3): Vector3;
+	sub(value: Vector3): Vector3;
+	mul(value: Vector3): Vector3;
+	mul(value: number): Vector3;
+	div(value: Vector3): Vector3;
+	div(value: number): Vector3;
 }
 
 declare const Vector3: {

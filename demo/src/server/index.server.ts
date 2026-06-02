@@ -1,5 +1,10 @@
 import { Players, ReplicatedStorage } from "@rbx-services";
 
+let v1 = new Vector2(10, 10);
+let v2 = new Vector2(3, 5);
+let v3 = v1.add(v2);
+
+
 // Create remote events for client-server communication
 const remotes = new Instance("Folder");
 remotes.Name = "Remotes";
