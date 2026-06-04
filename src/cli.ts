@@ -189,6 +189,22 @@ function handleCompile(
     packageManifest: manifest ?? undefined,
   };
 
+  // Directory compilation
+  const outputDir = opts.output ? resolve(opts.output) : absInput;
+  // Auto-detect Rojo project for cross-boundary import resolution
+  if (!compilerOpts.pathAliases) {
+    const rojoProject = findRojoProject(absInput);
+    if (rojoProject) {
+      const aliases = buildAliasesFromRojo(rojoProject, outputDir);
+      if (aliases.size > 0) {
+        compilerOpts.pathAliases = aliases;
+        console.log(
+          `Rojo: ${relative(process.cwd(), rojoProject)}`
+        );
+      }
+    }
+  }
+
   if (stat.isFile()) {
     // Single file compilation
     const source = readFileSync(absInput, "utf-8");
@@ -212,23 +228,6 @@ function handleCompile(
       process.stdout.write(result.luau);
     }
   } else if (stat.isDirectory()) {
-    // Directory compilation
-    const outputDir = opts.output ? resolve(opts.output) : absInput;
-
-    // Auto-detect Rojo project for cross-boundary import resolution
-    if (!compilerOpts.pathAliases) {
-      const rojoProject = findRojoProject(absInput);
-      if (rojoProject) {
-        const aliases = buildAliasesFromRojo(rojoProject, outputDir);
-        if (aliases.size > 0) {
-          compilerOpts.pathAliases = aliases;
-          console.log(
-            `Rojo: ${relative(process.cwd(), rojoProject)}`
-          );
-        }
-      }
-    }
-
     // Phase 1: Compile CSS files first (--css flag) to generate manifests
     if (opts.css) {
       const cssFiles = findCSSFiles(absInput);
@@ -346,6 +345,20 @@ function handleWatch(
     warnLevel: opts.warn as WarningLevel,
     packageManifest: manifest ?? undefined,
   };
+
+  // Auto-detect Rojo project for cross-boundary import resolution
+  if (!compilerOpts.pathAliases) {
+    const rojoProject = findRojoProject(absPath);
+    if (rojoProject) {
+      const aliases = buildAliasesFromRojo(rojoProject, outputDir);
+      if (aliases.size > 0) {
+        compilerOpts.pathAliases = aliases;
+        console.log(
+          `Rojo: ${relative(process.cwd(), rojoProject)}`
+        );
+      }
+    }
+  }
 
   startWatch(absPath, (files) => {
     for (const file of files) {
