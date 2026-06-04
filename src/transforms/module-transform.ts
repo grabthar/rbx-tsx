@@ -78,8 +78,8 @@ export function transformImport(
     moduleSpecifier.startsWith(key)
   );
   if (match) {
-    toRelative(moduleSpecifier, ctx);
-    return transformRelativeImport(node, moduleSpecifier, ctx);
+    const relModuleSpec = toRelative(moduleSpecifier, ctx);
+    return transformRelativeImport(node, relModuleSpec, ctx);
   }
 
   // Package imports (e.g., from node_modules)
@@ -382,7 +382,7 @@ function relativePathToRequirePath(
 
 function toRelative(moduleSpecifier: string, ctx: TransformContext): string {
   const currentFile = dirname(posix.normalize(ctx.filename)).replaceAll("\\", "/");
-  const result = relative(dirname(currentFile), moduleSpecifier).replaceAll("\\", "/");
+  const result = relative(currentFile, moduleSpecifier).replaceAll("\\", "/");
   return result;
 }
 

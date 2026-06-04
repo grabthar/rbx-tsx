@@ -35,6 +35,7 @@
     "test": "bun test",
     "dev": "bun run src/index.ts",
     "devdemo": "bun run src/index.ts compile ./demo/src -o out",
+    "devfactions": "bun run src/index.ts compile ../factions/src -o out",
     "generate": "bun run scripts/generate-types.ts",
     "prepublishOnly": "bun run build",
     "link": "bun link"
